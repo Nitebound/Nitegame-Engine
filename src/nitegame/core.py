@@ -2,14 +2,14 @@ import pygame as pg
 from pygame import Vector2, Rect
 from pygame.locals import *
 from math import cos, sin, radians
-
+from .codekit import rgb_to_hex
 """ Initialize Sub-Systems """
 
-from pygame.constants import *
+#from pygame.constants import *
 
 # Define some constants
 DEBUG_MODE = False
-DEFAULT_DISPLAY_SIZE = 1024, 768
+DEFAULT_DISPLAY_SIZE = 1600, 900
 COLORS = pg.colordict.THECOLORS
 
 
@@ -404,8 +404,8 @@ class GameObject:
 
         dest.blit(self.transformed_surface, self.rect.center - Vector2(self.rect.w/2, self.rect.h/2))
         #pg.draw.rect(dest, (255, 0, 0), self.rect, 1)
-        pg.draw.circle(dest, (0, 0, 255), self.transform.position, 3)
 
         if DEBUG_MODE:
             if self.parent:
                 pg.draw.line(dest, (0, 0, 0), self.transform.position, self.parent.transform.position)
+                pg.draw.circle(dest, (0, 0, 255), self.transform.position, 3)

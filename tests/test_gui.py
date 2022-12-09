@@ -1,7 +1,7 @@
 from src.nitegame.core import *
+
 display = PGDisplay()
 running = True
-
 
 while running:
     events = pg.event.get()
@@ -16,5 +16,5 @@ while running:
 
     # DRAW
     display.clear()
-    
+
     display.update()
