@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nitegame"
-version = "0.0.20"
+version = "0.0.22"
 description = "A game engine built on Pygame & ModernGL meant to simplify common game systems, and the process of developing, primarily, 2D games."
 readme = "README.md"
 authors = [{ name = "Zachery Visger", email = "niteboundx@gmail.com" }]
@@ -20,7 +20,6 @@ keywords = ["tools", "engine", "game", "pygame", "opengl", "moderngl", "2D"]
 dependencies = [
     "pygame",
     "numpy",
-    "pytmx"
 ]
 requires-python = ">=3.9"
 

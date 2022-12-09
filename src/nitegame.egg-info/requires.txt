@@ -1,6 +1,5 @@
 pygame
 numpy
-pytmx
 
 [dev]
 pip-tools
