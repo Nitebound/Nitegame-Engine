@@ -1,3 +1,1 @@
-__init__
-codekit
-core
+nitegame

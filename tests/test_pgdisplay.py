@@ -1,6 +1,4 @@
-from src.core import *
-import pygame as pg
-
+from src.nitegame.core import *
 display = PGDisplay()
 running = True
 

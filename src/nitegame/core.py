@@ -1,8 +1,8 @@
 import pygame as pg
 from pygame import Vector2, Rect
 from pygame.locals import *
-from src.codekit import *
-from math import atan2, cos, sin, radians, degrees
+from math import cos, sin, radians
+
 """ Initialize Sub-Systems """
 
 from pygame.constants import *
