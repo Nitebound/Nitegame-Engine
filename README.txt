@@ -1,5 +1,3 @@
-# `nite-engine`
+Nitegame Engine
 
-The Nite Engine is a game engine built for designing top-down, 2D games. It uses Pygame to handle
-graphics, audio, and event handling. This engine is being developed as-needed while I work on
-another game project.
+A game engine built on Pygame & ModernGL meant to simplify common game systems, and the process of developing, primarily, 2D games.
