@@ -74,3 +74,14 @@ class UILabel:
     def text(self, value):
         self._text = value
         self.surface = self.font.render(self._text, True, self._font_color, COLORS["black"])
+
+    def draw(self, dest, position, centerx=False):
+        if centerx:
+            dest.blit(self.surface, (position[0]-self.surface.get_width()/2, position[1]))
+        else:
+            dest.blit(self.surface, position)
+
+
+class UILink(UILabel):
+    def __init__(self, text, font_size=80, font_color=COLORS["black"], bg_color=None):
+        super().__init__(text, font_size, font_color, bg_color)

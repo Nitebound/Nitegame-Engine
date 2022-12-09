@@ -14,6 +14,8 @@ name_label = UILabel("Zachery", 30, COLORS["red"])
 name_label.set_sys_font("Times New Roman")
 name_label.font_color = COLORS["blue"]
 
+site_link = UILink("Nitebound Games")
+
 while running:
     events = pg.event.get()
     for event in events:
@@ -27,6 +29,8 @@ while running:
 
     # DRAW
     display.clear()
-    display.blit(font_label.surface, (display.get_width()/2 - font_label.surface.get_width()/2, 110))
-    display.blit(name_label.surface, (display.get_width()/2 - font_label.surface.get_width()/2, 300))
+    font_label.draw(display.surface, (display.get_width()/2, display.get_height()/2), True)
+    site_link.draw(display.surface, (display.get_width()/2, 0), True)
+    name_label.draw(display.surface, (display.get_width()/2, 100), True)
+
     display.update()
