@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: nitegame
-Version: 0.0.1
+Version: 0.0.20
 Summary: A game engine built on Pygame & ModernGL meant to simplify common game systems, and the process of developing, primarily, 2D games.
 Author-email: Zachery Visger <niteboundx@gmail.com>
 License: MIT License
@@ -14,7 +14,7 @@ License: MIT License
         
         THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Project-URL: Homepage, https://github.com/Nitebound/Nitegame-Engine
-Keywords: tools,engine,game
+Keywords: tools,engine,game,pygame,opengl,moderngl,2D
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Programming Language :: Python
 Classifier: Programming Language :: Python :: 3
