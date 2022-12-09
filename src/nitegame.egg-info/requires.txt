@@ -1,0 +1,6 @@
+pygame>=2.1.0
+numpy>=1.23.5
+pytmx>=3.31
+
+[dev]
+pip-tools

@@ -1,0 +1,13 @@
+LICENSE
+MANIFEST.in
+README.md
+pyproject.toml
+setup.py
+src/__init__.py
+src/codekit.py
+src/core.py
+src/nitegame.egg-info/PKG-INFO
+src/nitegame.egg-info/SOURCES.txt
+src/nitegame.egg-info/dependency_links.txt
+src/nitegame.egg-info/requires.txt
+src/nitegame.egg-info/top_level.txt

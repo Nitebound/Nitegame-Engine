@@ -18,5 +18,5 @@ while running:
 
     # DRAW
     display.clear()
-    #pg.draw.rect(display.surface, (0, 0, 0), (10, 10, 200, 200))
+    
     display.update()
