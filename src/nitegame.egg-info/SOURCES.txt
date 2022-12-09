@@ -6,6 +6,7 @@ setup.py
 src/nitegame/__init__.py
 src/nitegame/codekit.py
 src/nitegame/core.py
+src/nitegame/features.py
 src/nitegame.egg-info/PKG-INFO
 src/nitegame.egg-info/SOURCES.txt
 src/nitegame.egg-info/dependency_links.txt
