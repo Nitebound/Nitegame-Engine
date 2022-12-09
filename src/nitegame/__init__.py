@@ -1,2 +1,2 @@
-import nitegame.core
-import nitegame.codekit
+from . import core
+from . import codekit

@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: nitegame
-Version: 0.0.38
+Version: 0.0.41
 Summary: A game engine built on Pygame & ModernGL meant to simplify common game systems, and the process of developing, primarily, 2D games.
 Author-email: Zachery Visger <niteboundx@gmail.com>
 License: MIT License
