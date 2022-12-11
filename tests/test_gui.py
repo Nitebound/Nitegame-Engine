@@ -5,11 +5,12 @@ from pathlib import Path
 
 font_dir = Path("assets/fonts")
 
-display = PGDisplay((1920, 1200), "Nitegame Engine GUI Testing")
+display = PGDisplay((1024, 768), "Nitegame Engine GUI Testing")
 running = True
 
 my_button = UIButton("File", font_size=25)
 
+# This is a test to see how fast I can go back and forth between devices while making changes to this project
 while running:
     events = get_events()
     mouse_pos = get_mouse_pos()
