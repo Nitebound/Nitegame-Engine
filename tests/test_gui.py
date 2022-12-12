@@ -3,14 +3,29 @@ from src.nitegame.core import COLORS
 from src.nitegame.features import *
 from pathlib import Path
 
+
 font_dir = Path("assets/fonts")
 
 display = PGDisplay((1024, 768), "Nitegame Engine GUI Testing")
 running = True
 
-my_button = UIButton("File", font_size=25)
+file_menu = UIDropMenu()
+file_menu.add_option("Open")
+file_menu.add_option("Exit", quit)
 
-# This is a test to see how fast I can go back and forth between devices while making changes to this project
+edit_menu = UIDropMenu()
+edit_menu.add_option("Cut")
+edit_menu.add_option("Copy")
+edit_menu.add_option("Paste")
+edit_menu.add_option("Delete")
+
+menubar = UIMenuBar()
+menubar.add_option("File", file_menu)
+menubar.add_option("Edit", edit_menu)
+menubar.add_option("View")
+menubar.add_option("Create")
+
+
 while running:
     events = get_events()
     mouse_pos = get_mouse_pos()
@@ -24,14 +39,14 @@ while running:
             elif event.key == K_k:
                 core.DEBUG_MODE = not core.DEBUG_MODE
 
-    my_button.on_event(events, mouse_pos)
+    menubar.on_event(events, mouse_pos)
 
     # UPDATE
+    menubar.on_update(display.dt)
 
     # DRAW
     display.clear()
 
-    core.pg.draw.rect(display.surface, (200, 200, 200), (0, 0, display.get_width(), 28))
-    my_button.on_draw(display.surface, (0, 0))
+    menubar.on_draw(display.surface)
 
     display.update()

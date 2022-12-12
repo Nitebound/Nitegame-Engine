@@ -1,5 +1,6 @@
 """ UI Features """
 from . import core
+from . import codekit as ck
 from math import cos, sin, radians, degrees, atan2
 core.pg.font.init()
 DEFAULT_FONT = "Times New Roman"
@@ -148,41 +149,41 @@ class GameObject:
         # Or should all objects simply be placed using global coordinates, and then we can apply the relative offset.
 
         dest.blit(self.transformed_surface, self.rect.center - core.Vector2(self.rect.w/2, self.rect.h/2))
-        #pg.draw.rect(dest, (255, 0, 0), self.rect, 1)
 
         if core.DEBUG_MODE:
             if self.parent:
-                pg.draw.line(dest, (0, 0, 0), self.transform.position, self.parent.transform.position)
-                pg.draw.circle(dest, (0, 0, 255), self.transform.position, 3)
+                core.pg.draw.line(dest, (0, 0, 0), self.transform.position, self.parent.transform.position)
+                core.pg.draw.circle(dest, (0, 0, 255), self.transform.position, 3)
 
 
 class UIElement:
     def __init__(self):
         self.surface = core.pg.Surface((32, 32), core.SRCALPHA)
         self.rect = core.Rect(0, 0, self.surface.get_width(), self.surface.get_height())
+        self.position = core.Vector2(self.rect.topleft)
 
     def on_event(self, events, mouse_pos):
         pass
 
     def on_update(self, dt):
-        pass
+        self.position = core.Vector2(self.rect.topleft)
 
-    def on_draw(self, dest, position):
+    def on_draw(self, dest):
         pass
 
 
 class UILabel(UIElement):
-    def __init__(self, text, font_size=20, font_color=(0, 0, 0), bg_color=None):
+    def __init__(self, text, position=(0, 0), font_size=20, font_color=(0, 0, 0), bg_color=None):
         super().__init__()
         self._font_size = font_size
         self._font_color = font_color
-        self._bg_color = bg_color
+        self.bg_color = bg_color
         self._text = text
         self._font_path = None
 
         self.font = core.pg.font.SysFont(DEFAULT_FONT, font_size)
-        self.surface = self.font.render(self._text, True, self._font_color, self._bg_color)
-        self.rect = core.Rect(0, 0, self.surface.get_width(), self.surface.get_height())
+        self.surface = self.font.render(self._text, True, self._font_color, self.bg_color)
+        self.rect = core.Rect(position[0], position[1], self.surface.get_width(), self.surface.get_height())
 
     def set_sys_font(self, font_name=None, font_size=None):
         if not font_size:
@@ -191,7 +192,7 @@ class UILabel(UIElement):
             self._font_size = font_size
 
         self.font = core.pg.font.SysFont(font_name, font_size)
-        self.surface = self.font.render(self.text, True, self._font_color, self._bg_color)
+        self.surface = self.font.render(self.text, True, self._font_color, self.bg_color)
         self.rect = core.Rect(self.rect.x, self.rect.y, self.surface.get_width(), self.surface.get_height())
 
     def set_ttf_font(self, font_path=None, font_size=None):
@@ -206,21 +207,21 @@ class UILabel(UIElement):
             self._font_size = font_size
 
         self.font = core.pg.font.Font(font_path, font_size)
-        self.surface = self.font.render(self.text, True, self._font_color, self._bg_color)
+        self.surface = self.font.render(self.text, True, self._font_color, self.bg_color)
         self.rect = core.Rect(self.rect.x, self.rect.y, self.surface.get_width(), self.surface.get_height())
 
     def set_bold(self, value=True):
         self.font.set_bold(value)
-        self.surface = self.font.render(self._text, True, self._font_color, self._bg_color)
+        self.surface = self.font.render(self._text, True, self._font_color, self.bg_color)
 
     def set_underline(self, value=True):
         self.font.set_underline(value)
-        self.surface = self.font.render(self._text, True, self._font_color, self._bg_color)
+        self.surface = self.font.render(self._text, True, self._font_color, self.bg_color)
 
     @property
     def font_color(self, color):
         self._font_color = color
-        self.surface = self.font.render(self.text, True, self._font_color, self._bg_color)
+        self.surface = self.font.render(self.text, True, self._font_color, self.bg_color)
 
     @font_color.getter
     def font_color(self):
@@ -229,7 +230,7 @@ class UILabel(UIElement):
     @font_color.setter
     def font_color(self, color):
         self._font_color = color
-        self.surface = self.font.render(self.text, True, self._font_color, self._bg_color)
+        self.surface = self.font.render(self.text, True, self._font_color, self.bg_color)
 
     @property
     def text(self, value):
@@ -247,27 +248,29 @@ class UILabel(UIElement):
         self.surface = self.font.render(self._text, True, self._font_color, (0, 0, 0))
         self.rect = core.Rect(self.rect.x, self.rect.y, self.surface.get_width(), self.surface.get_height())
 
-    def on_draw(self, dest, position, centerx=False):
+    def on_draw(self, dest, centerx=False):
         if centerx:
-            self.rect = core.Rect(position[0]-self.surface.get_width()/2, position[1], self.surface.get_width(), self.surface.get_height())
-            dest.blit(self.surface, (position[0]-self.surface.get_width()/2, position[1]))
+            dest.blit(self.surface, (self.rect.centerx - self.surface.get_width()/2, self.rect.centery - self.surface.get_height()/2))
         else:
-            self.rect = core.Rect(position[0], position[1], self.surface.get_width(), self.surface.get_height())
-            dest.blit(self.surface, position)
+            dest.blit(self.surface, self.rect.topleft)
 
         if core.DEBUG_MODE:
             core.pg.draw.rect(dest, (255, 0, 0), self.rect, 1)
 
 
 class UILink(UILabel):
-    def __init__(self, text, font_size=20, font_color=(0, 0, 0), bg_color=None, command=None, cmd_args=()):
-        super().__init__(text, font_size, font_color, bg_color)
+    def __init__(self, text, position=(0, 0), font_size=20, font_color=(0, 0, 0), bg_color=None, command=None, cmd_args=None):
+        super().__init__(text, position, font_size, font_color, bg_color)
         self.mouseover = False
         self.clicked = False
         self.right_clicked = False
         self.holding = False
         self.command = command
         self.args = cmd_args
+
+        self.base_color = [val for val in font_color]
+        self.hover_color = (0, 0, 255)
+        self.clicked_color = (255, 0, 0)
 
     def on_event(self, events, mouse_pos):
         self.mouseover = False
@@ -281,15 +284,19 @@ class UILink(UILabel):
             if event.type == core.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     if self.mouseover:
+                        self.clicked = True
                         self.holding = True
 
             if event.type == core.MOUSEBUTTONUP:
                 if event.button == 1:
                     if self.mouseover:
                         if self.holding:
-                            self.clicked = True
+                            self.clicked = False
                             if self.command:
-                                self.command(self.args)
+                                if self.args:
+                                    self.command(self.args)
+                                else:
+                                    self.command()
 
                     self.holding = False
 
@@ -298,24 +305,131 @@ class UILink(UILabel):
                         self.right_clicked = True
 
         if core.pg.mouse.get_focused():
-            if self.mouseover:
-                self.set_underline(True)
+            if self.holding and self.clicked_color:
+                self.font_color = self.clicked_color
+            elif self.mouseover and self.hover_color:
+                self.font_color = self.hover_color
             else:
-                self.set_underline(False)
-
-            if self.holding:
-                self.font_color = (0, 0, 255)
-            else:
-                self.font_color = (0, 0, 0)
+                self.font_color = self.base_color
         else:
-            self.set_underline(False)
-            self.font_color = (0, 0, 0)
+            self.font_color = self.base_color
 
 
 class UIButton(UILink):
-    def __init__(self, text, font_size=20, font_color=(0, 0, 0), bg_color=(200, 200, 200), command=None, cmd_args=()):
-        super().__init__(text, font_size, font_color, bg_color, command, cmd_args)
+    def __init__(self, text, position=(0, 0), font_size=20, font_color=(0, 0, 0), bg_color=None, command=None, cmd_args=()):
+        super().__init__(text, position, font_size, font_color, bg_color, command, cmd_args)
+        self.rect.w += 10
+        self.rect.h += 10
+        self.clicked_color = (255, 255, 255)
+        self.hover_color = None
 
-    def on_draw(self, dest, position, centerx=False):
-        super().on_draw(dest, position, centerx)
-        core.pg.draw.rect(dest, (0, 0, 0), self.rect, 1)
+    def on_draw(self, dest, centerx=True):
+        if self.mouseover and core.pg.mouse.get_focused():
+            core.pg.draw.rect(dest, (180, 180, 180), self.rect)
+
+        super().on_draw(dest, centerx)
+
+
+class UIDropMenu(UIElement):
+    def __init__(self, position=(0, 0)):
+        super().__init__()
+        self.buttons = []
+        self.rect.x = position[0]
+        self.rect.y = position[1]
+        self.font_size = 16
+        self.active = False
+
+    def show(self):
+        self.active = True
+
+    def hide(self):
+        self.active = False
+
+    def add_option(self, text, command=None):
+        new_button = UIButton(text, font_size=self.font_size, command=command)
+        self.buttons.append(new_button)
+
+        if new_button.rect.w > self.rect.w:
+            self.rect.w = new_button.rect.w
+
+        self.rect.h = 0
+        for button in self.buttons:
+            button.rect.topleft = (self.rect.x, self.rect.y + self.rect.h)
+            self.rect.h += button.rect.h
+            button.rect.w = self.rect.w
+
+    def on_event(self, events, mouse_pos):
+        if self.active:
+            if not ck.pad_rect(self.rect, 8, 28).collidepoint(mouse_pos):
+                self.hide()
+            for button in self.buttons:
+                button.on_event(events, mouse_pos)
+
+    def on_update(self, dt):
+        if self.active:
+            super().on_update(dt)
+            yoff = 0
+            for button in self.buttons:
+                button.rect.topleft = (self.rect.x, self.rect.y + yoff)
+                yoff += button.rect.h
+                #button.rect.w = self.rect.w
+
+    def on_draw(self, dest):
+        if self.active:
+            core.pg.draw.rect(dest, (200, 200, 200), self.rect)
+            for button in self.buttons:
+                button.on_draw(dest)
+
+
+class UIMenuBar(UIElement):
+    def __init__(self):
+        super().__init__()
+
+        self.font_size = 16
+
+        self.options = []
+
+    def add_option(self, text, menu=None):
+        if menu:
+            button = UIButton(text, font_size=self.font_size, command=menu.show)
+        else:
+            button = UIButton(text, font_size=self.font_size)
+
+        self.options.append({"button": button, "menu": menu})
+
+        xoff = 0
+        for option in self.options:
+            option["button"].rect.topleft = (xoff, 0)
+            xoff += option["button"].rect.w
+
+        if menu:
+            menu.rect.topleft = core.Vector2(option["button"].rect.x, option["button"].rect.y + option["button"].rect.h)
+
+    def on_event(self, events, mouse_pos):
+        for option in self.options:
+            option["button"].on_event(events, mouse_pos)
+            if option["menu"]:
+                option["menu"].on_event(events, mouse_pos)
+                if option["menu"].active:
+                    for option2 in self.options:
+                        if option2["menu"]:
+                            if not option2 == option:
+                                option2["menu"].active = False
+
+    def on_update(self, dt):
+        for option in self.options:
+            option["button"].on_update(dt)
+            if option["menu"]:
+                option["menu"].on_update(dt)
+
+    def on_draw(self, dest):
+        core.pg.draw.rect(dest, (200, 200, 200), (0, 0, dest.get_width(), 28))
+        #core.pg.draw.line(dest, (0, 0, 0), (0, 28), (dest.get_width(), 28))
+
+        for option in self.options:
+            option["button"].on_draw(dest)
+
+            if option["menu"]:
+                if option["menu"].active:
+                    option["menu"].on_draw(dest)
+                #core.pg.draw.rect(dest, (255, 0, 0), option["menu"].rect, 1)

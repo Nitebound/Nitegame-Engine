@@ -182,10 +182,10 @@ def randompoint(x_limits, y_limits):
 
 def pad_rect(rect, h_pad, v_pad):
     rect = Rect(rect)
-    rect.x += h_pad
-    rect.y += v_pad
-    rect.w -= h_pad*2
-    rect.h -= v_pad*2
+    rect.x -= h_pad
+    rect.y -= v_pad
+    rect.w += h_pad*2
+    rect.h += v_pad*2
     return rect
 
 
