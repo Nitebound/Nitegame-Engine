@@ -3,7 +3,7 @@ from . import core
 from . import codekit as ck
 from math import cos, sin, radians, degrees, atan2
 core.pg.font.init()
-DEFAULT_FONT = "Times New Roman"
+DEFAULT_FONT = "Arial"
 
 
 class Component:
@@ -265,6 +265,7 @@ class UILink(UILabel):
         self.clicked = False
         self.right_clicked = False
         self.holding = False
+        self.released = False
         self.command = command
         self.args = cmd_args
 
@@ -276,6 +277,7 @@ class UILink(UILabel):
         self.mouseover = False
         self.clicked = False
         self.right_clicked = False
+        self.released = False
 
         if self.rect.collidepoint(mouse_pos):
             self.mouseover = True
@@ -299,7 +301,7 @@ class UILink(UILabel):
                                     self.command()
 
                     self.holding = False
-
+                    self.released = True
                 elif event.button == 3:
                     if self.mouseover:
                         self.right_clicked = True
@@ -344,9 +346,11 @@ class UIDropMenu(UIElement):
 
     def hide(self):
         self.active = False
+        for button in self.buttons:
+            button.holding = False
 
-    def add_option(self, text, command=None):
-        new_button = UIButton(text, font_size=self.font_size, command=command)
+    def add_option(self, text, command=None, cmd_args=()):
+        new_button = UIButton(text, font_size=self.font_size, command=command, cmd_args=cmd_args)
         self.buttons.append(new_button)
 
         if new_button.rect.w > self.rect.w:
@@ -360,10 +364,22 @@ class UIDropMenu(UIElement):
 
     def on_event(self, events, mouse_pos):
         if self.active:
-            if not ck.pad_rect(self.rect, 8, 28).collidepoint(mouse_pos):
-                self.hide()
             for button in self.buttons:
                 button.on_event(events, mouse_pos)
+
+            for event in events:
+                if event.type == core.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        if self.rect.collidepoint(mouse_pos):
+                            for button in self.buttons:
+                                if button.clicked:
+                                    if button.command:
+                                        if button.args:
+                                            button.command(button.args)
+                                        else:
+                                            button.command()
+
+                            self.active = False
 
     def on_update(self, dt):
         if self.active:
@@ -372,7 +388,14 @@ class UIDropMenu(UIElement):
             for button in self.buttons:
                 button.rect.topleft = (self.rect.x, self.rect.y + yoff)
                 yoff += button.rect.h
-                #button.rect.w = self.rect.w
+
+                if button.holding:
+                    if button.released:
+                        if button.command:
+                            if button.args:
+                                button.command(button.args)
+                            else:
+                                button.command()
 
     def on_draw(self, dest):
         if self.active:
@@ -384,9 +407,7 @@ class UIDropMenu(UIElement):
 class UIMenuBar(UIElement):
     def __init__(self):
         super().__init__()
-
         self.font_size = 16
-
         self.options = []
 
     def add_option(self, text, menu=None):
@@ -406,11 +427,37 @@ class UIMenuBar(UIElement):
             menu.rect.topleft = core.Vector2(option["button"].rect.x, option["button"].rect.y + option["button"].rect.h)
 
     def on_event(self, events, mouse_pos):
+        menu_open = False
+
+        # When the user clicks anywhere within a menu rect, check if a button was clicked. If so, perform the button's
+        # command. Then close the menu, whether a button was clicked or not.
+
+
         for option in self.options:
             option["button"].on_event(events, mouse_pos)
+
             if option["menu"]:
-                option["menu"].on_event(events, mouse_pos)
                 if option["menu"].active:
+                    menu_open = True
+
+                # Here we are looping through all the options again to see if a menu is already open. If that is true
+                # then any menubar option that the mouse hovers over will open, without the need to be clicked.
+                for o in self.options:
+                    if o["menu"]:
+                        if o["menu"].active:
+                            menu_open = True
+
+                if menu_open and option["button"].mouseover:
+                    option["menu"].show()
+
+                option["menu"].on_event(events, mouse_pos)
+
+                # While a menu is open, test to make sure the cursor is still within the menu's rect. If not, hide the
+                # menu.
+                if option["menu"].active:
+                    if not ck.pad_rect(option["menu"].rect, 8, 28).collidepoint(mouse_pos):
+                        option["menu"].hide()
+
                     for option2 in self.options:
                         if option2["menu"]:
                             if not option2 == option:
@@ -423,8 +470,8 @@ class UIMenuBar(UIElement):
                 option["menu"].on_update(dt)
 
     def on_draw(self, dest):
-        core.pg.draw.rect(dest, (200, 200, 200), (0, 0, dest.get_width(), 28))
-        #core.pg.draw.line(dest, (0, 0, 0), (0, 28), (dest.get_width(), 28))
+        self.rect = core.Rect(0, 0, dest.get_width(), 28)
+        core.pg.draw.rect(dest, (200, 200, 200), self.rect)
 
         for option in self.options:
             option["button"].on_draw(dest)
@@ -433,3 +480,5 @@ class UIMenuBar(UIElement):
                 if option["menu"].active:
                     option["menu"].on_draw(dest)
                 #core.pg.draw.rect(dest, (255, 0, 0), option["menu"].rect, 1)
+
+        core.pg.draw.line(dest, (0, 0, 0), (0, 28), (dest.get_width(), 28))
