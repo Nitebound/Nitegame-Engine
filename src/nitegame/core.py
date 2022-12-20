@@ -1,5 +1,4 @@
 import pygame as pg
-from pygame import Vector2, Rect
 from pygame.locals import *
 from math import cos, sin, radians
 from .codekit import rgb_to_hex
@@ -260,3 +259,92 @@ class GLDisplay(Display):
         #super().update()
 
 
+class InputDefinition:
+    def __init__(self, event_type, event_key):
+        self.event_type = event_type
+        self.event_key = event_key
+        self.pressed = False
+        self.released = False
+        self.held = False
+        self.state = 0
+
+
+class InputManager:
+    def __init__(self):
+        self.events = []
+        self.mouse_pos = pg.mouse.get_pos()
+        self.joystick_count = pg.joystick.get_count()
+        self.joysticks = [pg.joystick.Joystick(x) for x in range(self.joystick_count)]
+
+        self.inputs = {"exit": InputDefinition(pg.KEYDOWN, pg.K_ESCAPE),
+                       "sprint": InputDefinition(pg.KEYDOWN, pg.K_w)}
+
+    def create_input(self, name, event_type, event_key):
+        self.inputs[name] = InputDefinition(event_type, event_key)
+
+    def update_inputs(self):
+        self.events = pg.event.get()
+        self.mouse_pos = pg.mouse.get_pos()
+
+        for name in self.inputs:
+            self.inputs[name].pressed = False
+            self.inputs[name].released = False
+        for event in self.events:
+            if event.type == pg.QUIT:
+                return False
+
+            elif event.type == pg.JOYDEVICEADDED:
+                self.joystick_count = pg.joystick.get_count()
+                self.joysticks = [pg.joystick.Joystick(x) for x in range(self.joystick_count)]
+                print("Joystick(s) Connected:", self.joysticks)
+
+            elif event.type == pg.JOYDEVICEREMOVED:
+                self.joystick_count = pg.joystick.get_count()
+                self.joysticks = [pg.joystick.Joystick(x) for x in range(self.joystick_count)]
+                print("Joystick(s) Disconnected:", self.joysticks)
+
+            elif event.type == pg.KEYUP:
+                for name in self.inputs:
+                    if self.inputs[name].event_key == event.key:
+                        if self.inputs[name].held:
+                            self.inputs[name].pressed = False
+                            self.inputs[name].released = True
+
+                        self.inputs[name].held = False
+
+            elif event.type == pg.MOUSEBUTTONUP:
+                for name in self.inputs:
+                    if self.inputs[name].event_key == event.button:
+                        if self.inputs[name].held:
+                            self.inputs[name].pressed = False
+                            self.inputs[name].released = True
+
+                        self.inputs[name].held = False
+
+            elif event.type == pg.JOYBUTTONUP:
+                for name in self.inputs:
+                    if self.inputs[name].event_key == event.button:
+                        if self.inputs[name].held:
+                            self.inputs[name].pressed = False
+                            self.inputs[name].released = True
+
+                        self.inputs[name].held = False
+
+            for name in self.inputs:
+                if self.inputs[name].event_type == event.type:
+                    if event.type == pg.KEYDOWN:
+                        if self.inputs[name].event_key == event.key:
+                            self.inputs[name].held = True
+                            self.inputs[name].pressed = True
+
+                    elif event.type == pg.MOUSEBUTTONDOWN:
+                        if self.inputs[name].event_key == event.button:
+                            self.inputs[name].pressed = True
+                            self.inputs[name].held = True
+
+                    elif event.type == pg.JOYBUTTONDOWN:
+                        if self.inputs[name].event_key == event.button:
+                            self.inputs[name].pressed = True
+                            self.inputs[name].held = True
+
+        return True

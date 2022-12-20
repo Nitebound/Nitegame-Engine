@@ -1,8 +1,46 @@
 from fractions import Fraction
-from pygame import Vector2, time, mask, Surface, draw, transform, SRCALPHA, Rect
+import pygame as pg
 from math import inf, cos, sin, atan2, radians, degrees, pi
 from .features import UILabel
 from random import randint
+from noise import pnoise2
+import numpy as np
+
+
+def perlin_array(shape=(200, 200),
+                 scale=100, octaves=6,
+                 persistence=0.5,
+                 lacunarity=2.0,
+                 seed=None):
+
+    if not seed:
+        seed = np.random.randint(0, 100)
+
+    arr = np.zeros(shape)
+    for i in range(shape[0]):
+        for j in range(shape[1]):
+            arr[i][j] = pnoise2(i / scale,
+                                j / scale,
+                                octaves=octaves,
+                                persistence=persistence,
+                                lacunarity=lacunarity,
+                                repeatx=1024,
+                                repeaty=1024,
+                                base=seed)
+
+    max_arr = np.max(arr)
+    min_arr = np.min(arr)
+    norm_me = lambda x: (x-min_arr)/(max_arr - min_arr)
+    norm_me = np.vectorize(norm_me)
+    arr = norm_me(arr)
+    return arr
+
+
+def generate_heightmap(size, color=(255, 255, 255)):
+    noise = perlin_array(size)
+    pixel_data = [[(noise[x][y] * color[0], noise[x][y] * color[1], noise[x][y] * color[2]) for y in range(size[1])] for x in range(size[0])]
+    pixel_data = np.array(pixel_data)
+    return pg.surfarray.make_surface(pixel_data)
 
 
 # Define some methods to help with common tasks.
@@ -45,18 +83,18 @@ def intersect(a, b, c, d):
 def point_in_polygon(pt, poly):
     result = False
     for i in range(len(poly)-1):
-        if intersect(Vector2(poly[i].x, poly[i].y), Vector2(poly[i+1].x, poly[i+1].y), Vector2(pt.x, pt.y), Vector2(inf, pt.y)):
+        if intersect(pg.Vector2(poly[i].x, poly[i].y), pg.Vector2(poly[i+1].x, poly[i+1].y), pg.Vector2(pt.x, pt.y), pg.Vector2(inf, pt.y)):
             result = not result
-    if intersect(Vector2(poly[-1].x, poly[-1].y), Vector2(poly[0].x, poly[0].y), Vector2(pt.x, pt.y), Vector2(inf, pt.y)):
+    if intersect(pg.Vector2(poly[-1].x, poly[-1].y), pg.Vector2(poly[0].x, poly[0].y), pg.Vector2(pt.x, pt.y), pg.Vector2(inf, pt.y)):
         result = not result
     return result
 
 
 def closest_point_on_line(line_p1, line_p2, point):
     # Calculates the nearest point on a line from a given point.
-    line_p1 = Vector2(line_p1)
-    line_p2 = Vector2(line_p2)
-    point = Vector2(point)
+    line_p1 = pg.Vector2(line_p1)
+    line_p2 = pg.Vector2(line_p2)
+    point = pg.Vector2(point)
 
     A1 = line_p2.y - line_p1.y
     B1 = line_p1.x - line_p2.x
@@ -71,7 +109,7 @@ def closest_point_on_line(line_p1, line_p2, point):
     else:
         cx = point.x
         cy = point.y
-    return Vector2(cx, cy)
+    return pg.Vector2(cx, cy)
 
 
 def render_grid(dest, cols, rows, offset=(0, 0), unit_size=16, line_color=(0, 0, 0)):
@@ -105,7 +143,7 @@ class Timer:
 
     def update(self):
         if self.started:
-            self.elapsed_time = time.get_ticks() - self.start_time
+            self.elapsed_time = pg.time.get_ticks() - self.start_time
 
 
 def draw_tooltip(dest, text, position):
@@ -114,19 +152,19 @@ def draw_tooltip(dest, text, position):
     border_rect = tooltip_label.surface.get_rect()
     border_rect.x = position[0]
     border_rect.y = position[1]
-    draw.rect(dest, (110, 110, 110), border_rect)
+    pg.draw.rect(dest, (110, 110, 110), border_rect)
     tooltip_label.draw(dest, position)
 
 
 def render_outline(dest, surface, position, angle=0, color=(255, 255, 255, 255), border_size=1):
-    surf_mask = mask.from_surface(surface)
+    surf_mask = pg.mask.from_surface(surface)
     mask_outline = surf_mask.outline()
 
-    surf = Surface(surface.get_size(), SRCALPHA)
+    surf = pg.Surface(surface.get_size(), pg.SRCALPHA)
     for point in mask_outline:
-        draw.rect(surf, color, (point[0], point[1], border_size, border_size))
+        pg.draw.rect(surf, color, (point[0], point[1], border_size, border_size))
 
-    surf = transform.rotate(surf, angle)
+    surf = pg.transform.rotate(surf, angle)
     px = position[0]
     py = position[1]
     dest.blit(surf, (px, py))
@@ -138,7 +176,7 @@ def smooth_turn(goal_angle, current_angle, turn_speed, dt):
 
 
 def get_distance(point1, point2):
-    point1 = Vector2(point1)
+    point1 = pg.Vector2(point1)
     return point1.distance_to(point2)
 
 
@@ -181,7 +219,7 @@ def randompoint(x_limits, y_limits):
 
 
 def pad_rect(rect, h_pad, v_pad):
-    rect = Rect(rect)
+    rect = pg.Rect(rect)
     rect.x -= h_pad
     rect.y -= v_pad
     rect.w += h_pad*2
@@ -194,7 +232,7 @@ class DataGrid:
     def __init__(self, size):
         self.size = size
         self.data = [0 for x in range(self.size[0]*self.size[1])]
-        self.rect = Rect(0, 0, size[0], size[1])
+        self.rect = pg.Rect(0, 0, size[0], size[1])
 
     def load_data(self, map_data):
         # Load in map data using a 2D list of values
@@ -207,7 +245,7 @@ class DataGrid:
                 self.set_at((x, y), map_data[y][x])
 
     def get_area(self, rect, filled=True):
-        self.rect = Rect(rect)
+        self.rect = pg.Rect(rect)
         area = [[0 for _ in range(self.rect.h)] for _ in range(self.rect.w)]
 
         for y in range(0, self.rect.h):
@@ -332,16 +370,16 @@ def calculate_intersect_point(p1, p2, p3, p4):
     if p is not None:
         width = p2[0] - p1[0]
         height = p2[1] - p1[1]
-        r1 = Rect(p1, (width, height))
+        r1 = pg.Rect(p1, (width, height))
         r1.normalize()
 
         width = p4[0] - p3[0]
         height = p4[1] - p3[1]
-        r2 = Rect(p3, (width, height))
+        r2 = pg.Rect(p3, (width, height))
         r2.normalize()
 
         # Ensure both rects have a width and height of at least 'tolerance' else the
-        # collidepoint check of the Rect class will fail as it doesn't include the bottom
+        # collidepoint check of the pg.Rect class will fail as it doesn't include the bottom
         # and right hand side 'pixels' of the rectangle
         tolerance = 1
         if r1.width < tolerance:
@@ -362,10 +400,10 @@ def calculate_intersect_point(p1, p2, p3, p4):
                 res2 = r2.collidepoint(point)
                 if res1 and res2:
                     point = [int(pp) for pp in point]
-                    return Vector2(point)
+                    return pg.Vector2(point)
 
             except ValueError:
-                # sometimes the value in a point are too large for PyGame's Rect class
+                # sometimes the value in a point are too large for PyGame's pg.Rect class
                 s = "point was invalid  ", point
                 print(s)
 
@@ -378,14 +416,14 @@ def calculate_intersect_point(p1, p2, p3, p4):
 
 
 def line_box_intersect(p1, p2, rect):
-    p1, p2 = Vector2(p1), Vector2(p2)
-    rect = Rect(rect)
-    tl = Vector2(rect.topleft)
+    p1, p2 = pg.Vector2(p1), pg.Vector2(p2)
+    rect = pg.Rect(rect)
+    tl = pg.Vector2(rect.topleft)
 
-    tr = Vector2(rect.topright)
+    tr = pg.Vector2(rect.topright)
 
-    bl = Vector2(rect.bottomleft)
-    br = Vector2(rect.bottomright)
+    bl = pg.Vector2(rect.bottomleft)
+    br = pg.Vector2(rect.bottomright)
     points_intersected = []
 
     if p1.x - rect.left < 0:
@@ -416,7 +454,7 @@ def line_box_intersect(p1, p2, rect):
     least_d = 100000
 
     for i, point in enumerate(points_intersected):
-        d = Vector2(point).distance_to(p1)
+        d = pg.Vector2(point).distance_to(p1)
         if d < least_d:
             least_d = d
             least_id = i
@@ -427,7 +465,7 @@ def line_box_intersect(p1, p2, rect):
 
 def render_gradient_circle(radius, color1=(255, 217, 58, 150), color2=(255, 255, 255, 100)):
     sw, sh = radius*2, radius*2
-    surf = Surface((sw, sh), SRCALPHA)
+    surf = pg.Surface((sw, sh), pg.SRCALPHA)
 
     for r in range(radius):
         rd = r*1.5
@@ -442,14 +480,14 @@ def render_gradient_circle(radius, color1=(255, 217, 58, 150), color2=(255, 255,
         if c[2] >= 255: c[2] = 255
         if c[3] >= 255: c[3] = 255
 
-        draw.circle(surf, c, (sw/2, sh/2), r, 2)
+        pg.draw.circle(surf, c, (sw/2, sh/2), r, 2)
     return surf
 
 
 def get_radial_point(center, angle, radius):  # angle is in degrees and converted to radians below.
     p2x = center.x + radius * cos(radians(angle))
     p2y = center.y + radius * sin(radians(angle))
-    return Vector2(p2x, p2y)
+    return pg.Vector2(p2x, p2y)
 
 
 def angle_to(p1, p2):
@@ -457,8 +495,8 @@ def angle_to(p1, p2):
 
 
 def draw_arrow(dest, start, end, color=(0, 0, 0)):
-    draw.line(dest, color, start, end, 2)
-    draw.circle(dest, color, end, 3)
+    pg.draw.line(dest, color, start, end, 2)
+    pg.draw.circle(dest, color, end, 3)
 
 
 def render_tiled_surface(dest, texture_surface):
@@ -482,8 +520,8 @@ def get_poly_bounds(points):
         elif point[1] > max_y:
             max_y = point[1]
 
-    min_point = Vector2(min_x, min_y)
-    max_point = Vector2(max_x, max_y)
+    min_point = pg.Vector2(min_x, min_y)
+    max_point = pg.Vector2(max_x, max_y)
     return min_point, max_point
 
 
@@ -496,13 +534,13 @@ def get_poly_size(points):
 
 def generate_textured_polygon(points, texture_surface):
     pw, ph = get_poly_size(points)
-    poly_surf = Surface((pw+20, ph+20), SRCALPHA)
+    poly_surf = pg.Surface((pw+20, ph+20), pg.SRCALPHA)
     poly_surf.fill((255, 255, 255, 255))
-    draw.polygon(poly_surf, (255, 0, 0, 0), points)
+    pg.draw.polygon(poly_surf, (255, 0, 0, 0), points)
 
-    textured_surf = Surface(poly_surf.get_size(), SRCALPHA)
+    textured_surf = pg.Surface(poly_surf.get_size(), pg.SRCALPHA)
     textured_surf.blit(texture_surface, (0, 0))
     textured_surf.blit(poly_surf, (0, 0))
     textured_surf.set_colorkey((255, 255, 255, 255))
-    draw.polygon(textured_surf, (0, 0, 0), points, 3)
+    pg.draw.polygon(textured_surf, (0, 0, 0), points, 3)
     return textured_surf
