@@ -129,8 +129,6 @@ def load_music(fpath):
 
 
 """ Define Core Classes """
-
-
 class ColorData(Color):
     def __init__(self, r=0, g=0, b=0, a=255):
         super().__init__(r, g, b, a)
@@ -270,14 +268,21 @@ class InputDefinition:
 
 
 class InputManager:
-    def __init__(self):
+    def __init__(self, quick_exit=False):
         self.events = []
         self.mouse_pos = pg.mouse.get_pos()
         self.joystick_count = pg.joystick.get_count()
         self.joysticks = [pg.joystick.Joystick(x) for x in range(self.joystick_count)]
 
-        self.inputs = {"exit": InputDefinition(pg.KEYDOWN, pg.K_ESCAPE),
-                       "sprint": InputDefinition(pg.KEYDOWN, pg.K_w)}
+        self.inputs = {}
+        self.create_input("QuickExit", pg.KEYDOWN, pg.K_ESCAPE)
+
+    def bind_defaults(self):
+        self.create_input("Up", KEYDOWN, K_w)
+        self.create_input("Down", KEYDOWN, K_s)
+        self.create_input("Left", KEYDOWN, K_a)
+        self.create_input("Right", KEYDOWN, K_d)
+        self.create_input("Ability1", MOUSEBUTTONDOWN, 1)
 
     def create_input(self, name, event_type, event_key):
         self.inputs[name] = InputDefinition(event_type, event_key)

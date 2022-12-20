@@ -27,7 +27,7 @@ def create_object():
     objects.append(obj)
 
 
-font_dir = Path("assets/fonts")
+font_dir = Path("../assets/fonts")
 
 display = PGDisplay((1920, 1080), "Nitegame Engine GUI Testing")
 running = True

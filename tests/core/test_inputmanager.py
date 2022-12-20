@@ -9,14 +9,14 @@ if __name__ == "__main__":
     running = True
 
     im = ng.InputManager()
-    im.create_input("exit", KEYDOWN, K_ESCAPE)
+    im.bind_defaults()
 
     # Main Loop
     while running:
         # Event
         running = im.update_inputs()
 
-        if im.inputs["exit"].released:
+        if im.inputs["QuickExit"].released:
             running = False
 
         # Update
