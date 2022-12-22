@@ -1,20 +1,22 @@
-from src.nitegame.core import *
-display = PGDisplay()
+import src.nitegame as ng
+
+ng.init()
+
+display = ng.PGDisplay()
 running = True
 
+texture = ng.load_image("../assets/terrainmap1.png")
+tp = ng.codekit.generate_textured_polygon([(0, 0), (100, 0), (150, 100), (150, 200), (100, 300), (0, 300)], texture)
+im = ng.InputManager()
 
 while running:
-    events = pg.event.get()
-    for event in events:
-        if event.type == QUIT:
-            running = False
-        elif event.type == KEYDOWN:
-            if event.key == K_ESCAPE:
-                running = False
+    running = im.update_inputs()
+    if im.inputs["QuickExit"].released:
+        running = False
 
     # UPDATE
 
     # DRAW
     display.clear()
-    
+    display.blit(tp, (100, 100))
     display.update()

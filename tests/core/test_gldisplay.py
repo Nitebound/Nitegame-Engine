@@ -5,12 +5,11 @@ if __name__ == "__main__":
     # Initialize
     ng.init()
 
-    display = ng.PGDisplay()
+    display = ng.GLDisplay()
     running = True
 
     im = ng.InputManager()
     im.bind_defaults()
-    im.create_input("Fire", JOYBUTTONDOWN, 1)
 
     # Main Loop
     while running:
@@ -19,8 +18,7 @@ if __name__ == "__main__":
 
         if im.inputs["QuickExit"].released:
             running = False
-        if im.inputs["Fire"].pressed:
-            print("Fire!")
+
         # Update
 
         # Draw

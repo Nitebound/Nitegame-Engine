@@ -1,7 +1,11 @@
 import pygame as pg
 from pygame.locals import *
+from pygame import Vector2, Vector3, Rect
 from math import cos, sin, radians
 from .codekit import rgb_to_hex
+from OpenGL.GL import *
+from OpenGL.GLU import *
+from OpenGL.GLUT import *
 """ Initialize Sub-Systems """
 
 #from pygame.constants import *
@@ -139,6 +143,7 @@ class ColorData(Color):
 
 class Display:
     def __init__(self, size=DEFAULT_DISPLAY_SIZE, caption="Display", flags=0):
+        init()
         self.surface = pg.display.set_mode(size, flags)
         self._size = size
         self._caption = caption
@@ -184,8 +189,8 @@ class Display:
         pass
 
     def update(self):
-        self.clock.tick(self.frame_rate)
-
+        self.dt = self.clock.tick(self.frame_rate)
+        return self.dt
 
 class PGDisplay(Display):
     """ An easy to use Pygame display."""
@@ -200,7 +205,7 @@ class PGDisplay(Display):
 
     def update(self):
         pg.display.update()
-        super().update()
+        return super().update()
 
 
 class GLDisplay(Display):
@@ -229,28 +234,6 @@ class GLDisplay(Display):
             applications, so it will likely be useful in some cases.
         """
         pass
-
-    def draw_cube(self, position=(0, 0, 0), color=(255, 255, 255), size=1, wire=False):
-        glColor3f(color[0], color[1], color[2])
-        glPushMatrix()
-        glTranslatef(position[0], position[1], position[2])
-
-        if wire:
-            glutWireCube(size)
-        else:
-            glutSolidCube(size)
-        glPopMatrix()
-
-    def draw_sphere(self, position=(0, 0, 0), color=(255, 255, 255), size=1, slices=(30, 30), wire=False):
-        glColor3f(color[0], color[1], color[2])
-        glPushMatrix()
-        glTranslatef(position[0], position[1], position[2])
-        # size is 2x the radius, so we half the given size.
-        if wire:
-            glutWireSphere(size * .5, slices[0], slices[1])
-        else:
-            glutSolidSphere(size * .5, slices[0], slices[1])
-        glPopMatrix()
 
     def update(self):
         pg.display.flip()

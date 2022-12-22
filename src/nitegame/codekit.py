@@ -542,5 +542,5 @@ def generate_textured_polygon(points, texture_surface):
     textured_surf.blit(texture_surface, (0, 0))
     textured_surf.blit(poly_surf, (0, 0))
     textured_surf.set_colorkey((255, 255, 255, 255))
-    pg.draw.polygon(textured_surf, (0, 0, 0), points, 3)
+    #pg.draw.polygon(textured_surf, (0, 0, 0), points, 3)
     return textured_surf
