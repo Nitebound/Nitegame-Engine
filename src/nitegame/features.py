@@ -3,7 +3,7 @@ from . import core
 from . import codekit as ck
 from math import cos, sin, radians, degrees, atan2
 core.pg.font.init()
-DEFAULT_FONT = "Arial"
+DEFAULT_FONT = "TimesNewRoman"
 
 
 class Component:
@@ -158,7 +158,7 @@ class GameObject:
 
 class UIElement:
     def __init__(self):
-        self.surface = core.pg.Surface((32, 32), core.SRCALPHA)
+        self.surface = core.pg.Surface((0, 0), core.SRCALPHA)
         self.rect = core.Rect(0, 0, self.surface.get_width(), self.surface.get_height())
         self.position = core.Vector2(self.rect.topleft)
 
@@ -269,7 +269,7 @@ class UILink(UILabel):
         self.command = command
         self.args = cmd_args
 
-        self.base_color = [val for val in font_color]
+        self.base_color = font_color
         self.hover_color = (0, 0, 255)
         self.clicked_color = (255, 0, 0)
 
@@ -302,6 +302,7 @@ class UILink(UILabel):
 
                     self.holding = False
                     self.released = True
+
                 elif event.button == 3:
                     if self.mouseover:
                         self.right_clicked = True
@@ -348,6 +349,8 @@ class UIDropMenu(UIElement):
         self.active = False
         for button in self.buttons:
             button.holding = False
+            button.clicked = False
+            button.released = False
 
     def add_option(self, text, command=None, cmd_args=()):
         new_button = UIButton(text, font_size=self.font_size, command=command, cmd_args=cmd_args)
@@ -378,8 +381,7 @@ class UIDropMenu(UIElement):
                                             button.command(button.args)
                                         else:
                                             button.command()
-
-                            self.active = False
+                        self.hide()
 
     def on_update(self, dt):
         if self.active:
@@ -391,6 +393,7 @@ class UIDropMenu(UIElement):
 
                 if button.holding:
                     if button.released:
+
                         if button.command:
                             if button.args:
                                 button.command(button.args)
@@ -402,6 +405,8 @@ class UIDropMenu(UIElement):
             core.pg.draw.rect(dest, (200, 200, 200), self.rect)
             for button in self.buttons:
                 button.on_draw(dest)
+
+            core.pg.draw.rect(dest, (0, 0, 0), self.rect, 1)
 
 
 class UIMenuBar(UIElement):

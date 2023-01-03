@@ -15,9 +15,12 @@ DEBUG_MODE = False
 DEFAULT_DISPLAY_SIZE = 1600, 900
 COLORS = pg.colordict.THECOLORS
 
+for color in COLORS:
+    c = COLORS[color]
+    COLORS[color] = [c[0], c[1], c[2], c[3]]
 
 """ 
-Define the methods needed to handle most lower level engine features including loading assets, and handling player
+Define the methods needed to handle most lower level engine features including loading assets, and handling user
 input.
 """
 
@@ -133,14 +136,6 @@ def load_music(fpath):
 
 
 """ Define Core Classes """
-class ColorData(Color):
-    def __init__(self, r=0, g=0, b=0, a=255):
-        super().__init__(r, g, b, a)
-
-    def get_hex(self):
-        return rgb_to_hex((self.r, self.g, self.b, self.a))
-
-
 class Display:
     def __init__(self, size=DEFAULT_DISPLAY_SIZE, caption="Display", flags=0):
         init()

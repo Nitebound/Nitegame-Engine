@@ -13,11 +13,11 @@ from pathlib import Path
 asset_path = Path("../assets")
 
 pygame.init()
-pygame.display.set_mode((600, 400), DOUBLEBUF | OPENGL)
+display = pygame.display.set_mode((600, 400), DOUBLEBUF | OPENGL)
 
 # Generate shaders
-vertex_shader = shaders.compileShader(open("../core/shaders/basic_vertex_shader.glsl").read(), GL_VERTEX_SHADER)
-fragment_shader = shaders.compileShader(open("../core/shaders/basic_fragment_shader.glsl"), GL_FRAGMENT_SHADER)
+vertex_shader = shaders.compileShader(open("../core/shaders/default_vertex_shader.glsl").read(), GL_VERTEX_SHADER)
+fragment_shader = shaders.compileShader(open("../core/shaders/default_fragment_shader.glsl").read(), GL_FRAGMENT_SHADER)
 shader = shaders.compileProgram(vertex_shader, fragment_shader)
 
 glDeleteShader(vertex_shader)
@@ -45,7 +45,10 @@ im.bind_defaults()
 running = True
 clock = pygame.time.Clock()
 dt = 1
-glTranslate(-.5, 0, 0)
+
+gluPerspective(45, (display.get_width() / display.get_height()), 0.1, 50.0)
+
+glTranslate(.5, 0, 0)
 
 glClearColor(0.1, 0.1, 0.1, 1)
 

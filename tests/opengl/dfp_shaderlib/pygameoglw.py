@@ -21,7 +21,7 @@ class PygameOpenGLWin:
         self.config()
 
         #self.screen = pygame.Surface(dimensions)
-        self.screen = pygame.Surface((dimensions[0], dimensions[1]), pygame.SRCALPHA)
+        #self.screen = pygame.Surface((dimensions[0], dimensions[1]), pygame.SRCALPHA)
 
         self.texcoords = [
             0.0, 1.0,
@@ -58,15 +58,15 @@ class PygameOpenGLWin:
         self.fg_queue.append((wtex, pos, config))
 
     def update_clear(self, color=(0, 0, 0), config={}, shader=None):
-        screen_tex = WrappedTexture(self.screen, self)
-        if shader:
-            screen_tex.set_shader(shader)
-        screen_tex.draw((0, 0), config=config)
+        #screen_tex = WrappedTexture(self.screen, self)
+        # if shader:
+        #     screen_tex.set_shader(shader)
+        # screen_tex.draw((0, 0), config=config)
 
         for task in self.fg_queue:
             task[0].draw(task[1], config=task[2])
 
-        screen_tex.delete()
+        #screen_tex.delete()
         self.fg_queue = []
 
         pygame.display.flip()
